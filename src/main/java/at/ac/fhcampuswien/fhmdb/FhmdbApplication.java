@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.fhmdb;
 
 import at.ac.fhcampuswien.fhmdb.enums.UIComponent;
+import at.ac.fhcampuswien.fhmdb.util.ControllerFactory;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -12,9 +13,11 @@ import java.util.Objects;
 public class FhmdbApplication extends Application {
     @Override
     public void start(Stage stage) {
+        // Set the ControllerFactory on the FXMLLoader
         FXMLLoader fxmlLoader = new FXMLLoader(FhmdbApplication.class.getResource(UIComponent.HOME.path));
+        fxmlLoader.setControllerFactory(ControllerFactory.getInstance());
 
-        try{
+        try {
             Scene scene = new Scene(fxmlLoader.load(), 890, 620);
             scene.getStylesheets().add(Objects.requireNonNull(FhmdbApplication.class.getResource("/styles/styles.css")).toExternalForm());
             stage.setTitle("FHMDb!");
@@ -25,7 +28,6 @@ public class FhmdbApplication extends Application {
         } catch (NullPointerException e) {
             System.err.println("Path to stylesheet may be corrupt.");
         }
-
     }
 
     public static void main(String[] args) {

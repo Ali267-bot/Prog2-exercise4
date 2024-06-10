@@ -7,6 +7,10 @@ import at.ac.fhcampuswien.fhmdb.database.*;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.SortedState;
+import at.ac.fhcampuswien.fhmdb.sorting.AscendingState;
+import at.ac.fhcampuswien.fhmdb.sorting.DescendingState;
+import at.ac.fhcampuswien.fhmdb.sorting.SortState;
+import at.ac.fhcampuswien.fhmdb.sorting.UnsortedState;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import at.ac.fhcampuswien.fhmdb.ui.UserDialog;
 import com.jfoenix.controls.JFXButton;
@@ -18,6 +22,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
+import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
+
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -48,6 +54,7 @@ public class MovieListController implements Initializable {
     public JFXButton sortBtn;
 
     public List<Movie> allMovies;
+    private List<Movie> currentMovies;
 
     protected ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
@@ -55,10 +62,9 @@ public class MovieListController implements Initializable {
 
     private final ClickEventHandler onAddToWatchlistClicked = (clickedItem) -> {
         if (clickedItem instanceof Movie movie) {
-            WatchlistMovieEntity watchlistMovieEntity = new WatchlistMovieEntity(
-                    movie.getId());
+            WatchlistMovieEntity watchlistMovieEntity = new WatchlistMovieEntity(movie.getId());
             try {
-                WatchlistRepository repository = new WatchlistRepository();
+                WatchlistRepository repository = WatchlistRepository.getInstance();
                 repository.addToWatchlist(watchlistMovieEntity);
             } catch (DataBaseException e) {
                 UserDialog dialog = new UserDialog("Database Error", "Could not add movie to watchlist");
@@ -68,10 +74,19 @@ public class MovieListController implements Initializable {
         }
     };
 
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Initialize the lists
+        allMovies = new ArrayList<>();
+        currentMovies = new ArrayList<>();
+
         initializeState();
         initializeLayout();
+
+        // Set the initial state to Unsorted
+        currentState = new UnsortedState();
+        currentState.setMovieList(currentMovies);
     }
 
     public void initializeState() {
@@ -80,19 +95,17 @@ public class MovieListController implements Initializable {
             result = MovieAPI.getAllMovies();
             writeCache(result);
         } catch (MovieApiException e){
-            UserDialog dialog = new UserDialog("MovieAPI Error", "Could not load movies from api. Get movies from db cache instead");
+            UserDialog dialog = new UserDialog("MovieAPI Error", "Could not load movies from API. Get movies from DB cache instead");
             dialog.show();
             result = readCache();
         }
-
-        setMovies(result);
+        allMovies = new ArrayList<>(result);
         setMovieList(result);
-        sortedState = SortedState.NONE;
     }
 
     private List<Movie> readCache() {
         try {
-            MovieRepository movieRepository = new MovieRepository();
+            MovieRepository movieRepository = MovieRepository.getInstance();
             return MovieEntity.toMovies(movieRepository.getAllMovies());
         } catch (DataBaseException e) {
             UserDialog dialog = new UserDialog("DB Error", "Could not load movies from DB");
@@ -101,18 +114,18 @@ public class MovieListController implements Initializable {
         }
     }
 
+
     private void writeCache(List<Movie> movies) {
         try {
-            // cache movies in db
-            MovieRepository movieRepository = new MovieRepository();
-            movieRepository.removeAll();
-            movieRepository.addAllMovies(movies);
-
+            MovieRepository movieRepository = MovieRepository.getInstance();
+            movieRepository.removeAll(); // Clear existing entries
+            movieRepository.addAllMovies(movies); // Add new movies
         } catch (DataBaseException e) {
             UserDialog dialog = new UserDialog("DB Error", "Could not write movies to DB");
             dialog.show();
         }
     }
+
 
     public void initializeLayout() {
         movieListView.setItems(observableMovies);   // set the items of the listview to the observable list
@@ -151,8 +164,10 @@ public class MovieListController implements Initializable {
     }
 
     public void setMovieList(List<Movie> movies) {
+        currentMovies.clear();
+        currentMovies.addAll(movies);
         observableMovies.clear();
-        observableMovies.addAll(movies);
+        observableMovies.addAll(currentMovies);
     }
     public void sortMovies(){
         if (sortedState == SortedState.NONE || sortedState == SortedState.DESCENDING) {
@@ -173,6 +188,23 @@ public class MovieListController implements Initializable {
             sortedState = SortedState.DESCENDING;
         }
     }
+
+    private SortState currentState;
+
+    public void toggleSortState() {
+        if (currentState instanceof UnsortedState) {
+            currentState = new AscendingState();
+        } else if (currentState instanceof AscendingState) {
+            currentState = new DescendingState();
+        } else if (currentState instanceof DescendingState) {
+            currentState = new UnsortedState();
+        }
+        currentState.setMovieList(allMovies); // Set the list every time state changes
+        currentState.sort(observableMovies);
+        movieListView.refresh();
+    }
+
+
 
     public List<Movie> filterByQuery(List<Movie> movies, String query){
         if(query == null || query.isEmpty()) return movies;
@@ -252,7 +284,8 @@ public class MovieListController implements Initializable {
         }
     }
 
+    @FXML
     public void sortBtnClicked(ActionEvent actionEvent) {
-        sortMovies();
+        toggleSortState();
     }
 }

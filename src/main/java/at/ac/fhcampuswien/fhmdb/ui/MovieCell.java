@@ -95,27 +95,37 @@ public class MovieCell extends ListCell<Movie> {
         super.updateItem(movie, empty);
 
         if (empty || movie == null) {
-            setGraphic(null);
             setText(null);
+            setGraphic(null);
         } else {
-            this.getStyleClass().add("movie-cell");
             title.setText(movie.getTitle());
-            detail.setText(
-                    movie.getDescription() != null
-                            ? movie.getDescription()
-                            : "No description available"
-            );
+            detail.setText(movie.getDescription() != null ? movie.getDescription() : "No description available");
 
-            String genres = movie.getGenres()
-                    .stream()
+            String genres = movie.getGenres().stream()
                     .map(Enum::toString)
                     .collect(Collectors.joining(", "));
             genre.setText(genres);
 
-            detail.setMaxWidth(this.getScene().getWidth() - 30);
+            if (getScene() != null) {
+                updateLayout();
+            } else {
+                sceneProperty().addListener((obs, oldScene, newScene) -> {
+                    if (newScene != null) {
+                        updateLayout();
+                    }
+                });
+            }
 
             setGraphic(layout);
         }
     }
+
+    private void updateLayout() {
+        if (getScene() != null) {
+            double width = getScene().getWidth();
+            detail.setMaxWidth(width - 30);
+        }
+    }
+
 }
 

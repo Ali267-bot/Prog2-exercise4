@@ -22,9 +22,14 @@ public class WatchlistCell extends ListCell<MovieEntity> {
     private final VBox layout = new VBox(header, description, genre);
     private boolean collapsedDetails = true;
 
-    public WatchlistCell(ClickEventHandler removeFromWatchlistClick) {
+    public WatchlistCell(ClickEventHandler<MovieEntity> removeFromWatchlistClick) {
         super();
-        // color scheme
+        styleComponents();
+        setupButtonActions(removeFromWatchlistClick);
+    }
+
+    private void styleComponents() {
+        // Styling components
         detailBtn.setStyle("-fx-background-color: #f5c518;");
         HBox.setMargin(detailBtn, new Insets(0, 10, 0, 10));
         removeBtn.setStyle("-fx-background-color: #f5c518;");
@@ -35,50 +40,40 @@ public class WatchlistCell extends ListCell<MovieEntity> {
         layout.setBackground(new Background(new BackgroundFill(Color.web("#454545"), null, null)));
         header.setAlignment(Pos.CENTER_LEFT);
         header.setHgrow(title, Priority.ALWAYS);
-        header.setHgrow(detailBtn, Priority.ALWAYS);
         title.setMaxWidth(Double.MAX_VALUE);
-
-        // layout
-        title.fontProperty().set(title.getFont().font(20));
-        description.setWrapText(true);
         layout.setPadding(new Insets(10));
+    }
 
-        detailBtn.setOnMouseClicked(mouseEvent -> {
-            if (collapsedDetails) {
-                layout.getChildren().add(getDetails());
-                collapsedDetails = false;
-                detailBtn.setText("Hide Details");
-            } else {
-                layout.getChildren().remove(3);
-                collapsedDetails = true;
-                detailBtn.setText("Show Details");
-            }
-            setGraphic(layout);
-        });
+    private void setupButtonActions(ClickEventHandler<MovieEntity> removeFromWatchlistClick) {
+        detailBtn.setOnMouseClicked(mouseEvent -> toggleDetails());
+        removeBtn.setOnMouseClicked(mouseEvent -> removeFromWatchlistClick.onClick(getItem()));
+    }
 
-        removeBtn.setOnMouseClicked(mouseEvent -> {
-            removeFromWatchlistClick.onClick(getItem());
-        });
+    private void toggleDetails() {
+        if (collapsedDetails) {
+            layout.getChildren().add(getDetails());
+            collapsedDetails = false;
+            detailBtn.setText("Hide Details");
+        } else {
+            layout.getChildren().remove(3);
+            collapsedDetails = true;
+            detailBtn.setText("Show Details");
+        }
+        setGraphic(layout);
     }
 
     private VBox getDetails() {
         VBox details = new VBox();
-
-        Label releaseYear = new Label("Release Year: " + getItem().getReleaseYear());
-        Label length = new Label("Length: " + getItem().getLengthInMinutes() + " minutes");
-        Label rating = new Label("Rating: " + getItem().getRating());
-
-        releaseYear.getStyleClass().add("text-white");
-        length.getStyleClass().add("text-white");
-        rating.getStyleClass().add("text-white");
-
-        details.getChildren().add(releaseYear);
-        details.getChildren().add(rating);
-        details.getChildren().add(length);
-
-
+        details.getChildren().addAll(
+                new Label("Release Year: " + getItem().getReleaseYear()),
+                new Label("Length: " + getItem().getLengthInMinutes() + " minutes"),
+                new Label("Rating: " + getItem().getRating()),
+                new Label("Genres: " + getItem().getGenres())
+        );
+        details.getChildren().forEach(label -> label.getStyleClass().add("text-white"));
         return details;
     }
+
     @Override
     protected void updateItem(MovieEntity movieEntity, boolean empty) {
         super.updateItem(movieEntity, empty);
@@ -87,25 +82,29 @@ public class WatchlistCell extends ListCell<MovieEntity> {
             setGraphic(null);
             setText(null);
         } else {
-            this.getStyleClass().add("movie-cell");
+            updateContent(movieEntity);
+        }
+    }
 
-            title.setText(movieEntity.getTitle());
-            description.setText(
-                    movieEntity.getDescription() != null
-                            ? movieEntity.getDescription()
-                            : "No description available"
-            );
+    private void updateContent(MovieEntity movieEntity) {
+        title.setText(movieEntity.getTitle());
+        description.setText(movieEntity.getDescription() != null ? movieEntity.getDescription() : "No description available");
+        genre.setText(movieEntity.getGenres().stream().map(Enum::toString).collect(Collectors.joining(", ")));
 
-            description.setMaxWidth(this.getScene().getWidth() - 30);
+        // Safely updating layout depending on scene availability
+        if (getScene() != null) {
+            updateLayout();
+        } else {
+            sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) updateLayout();
+            });
+        }
+        setGraphic(layout);
+    }
 
-            String genres = movieEntity.getGenres()
-                    .stream()
-                    .map(Enum::toString)
-                    .collect(Collectors.joining(", "));
-            genre.setText(genres);
-
-            setGraphic(layout);
+    private void updateLayout() {
+        if (getScene() != null) {
+            description.setMaxWidth(getScene().getWidth() - 30);
         }
     }
 }
-

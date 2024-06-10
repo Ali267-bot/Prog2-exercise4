@@ -6,14 +6,27 @@ import com.j256.ormlite.dao.Dao;
 import java.util.List;
 
 public class MovieRepository {
-    Dao<MovieEntity, Long> dao;
+    private static MovieRepository instance;
+    private Dao<MovieEntity, Long> dao;
 
-    public MovieRepository() throws DataBaseException {
+    // Private constructor to prevent external instantiation
+    private MovieRepository() throws DataBaseException {
         try {
             this.dao = DatabaseManager.getInstance().getMovieDao();
         } catch (Exception e) {
-            throw new DataBaseException(e.getMessage());
+            throw new DataBaseException("Failed to initialize DAO: " + e.getMessage());
         }
+    }
+
+    // Public method to get the singleton instance
+    public static synchronized MovieRepository getInstance() throws DataBaseException {
+        if (instance == null) {
+            instance = new MovieRepository();
+            System.out.println("New Instance of MovieRepository created!");
+        } else {
+            System.out.println("Existing Instance of MovieRepository used!");
+        }
+        return instance;
     }
 
     public long countRows() throws DataBaseException {
@@ -24,6 +37,7 @@ public class MovieRepository {
             throw new DataBaseException("Error while counting movies");
         }
     }
+
     public List<MovieEntity> getAllMovies() throws DataBaseException {
         try {
             return dao.queryForAll();
@@ -60,5 +74,4 @@ public class MovieRepository {
             throw new DataBaseException("Error while adding to movies");
         }
     }
-
 }
