@@ -14,6 +14,7 @@ public class MovieAPI {
     private static final String URL = "https://prog2.fh-campuswien.ac.at/movies"; // https if certificates work
     private static final OkHttpClient client = new OkHttpClient();
 
+
     private String buildUrl(UUID id) {
         StringBuilder url = new StringBuilder(URL);
         if (id != null) {
@@ -21,6 +22,7 @@ public class MovieAPI {
         }
         return url.toString();
     }
+
 
     private static String buildUrl(String query, Genre genre, String releaseYear, String ratingFrom) {
         StringBuilder url = new StringBuilder(URL);
@@ -48,9 +50,11 @@ public class MovieAPI {
         return url.toString();
     }
 
+
     public static List<Movie> getAllMovies() throws MovieApiException {
         return getAllMovies(null, null, null, null);
     }
+
 
     public static List<Movie> getAllMovies(String query, Genre genre, String releaseYear, String ratingFrom) throws MovieApiException {
         MovieAPIRequestBuilder builder = new MovieAPIRequestBuilder(URL)
@@ -77,6 +81,7 @@ public class MovieAPI {
     }
 
 
+
     public Movie requestMovieById(UUID id) throws MovieApiException {
         String url = buildUrl(id);
         Request request = new Request.Builder()
@@ -91,3 +96,11 @@ public class MovieAPI {
         }
     }
 }
+
+
+
+
+
+
+
+
