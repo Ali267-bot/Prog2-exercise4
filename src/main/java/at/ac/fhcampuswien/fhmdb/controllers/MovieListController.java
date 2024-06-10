@@ -61,6 +61,7 @@ public class MovieListController implements Initializable {
     protected SortedState sortedState;
 
     private final ClickEventHandler onAddToWatchlistClicked = (clickedItem) -> {
+
         if (clickedItem instanceof Movie movie) {
             WatchlistMovieEntity watchlistMovieEntity = new WatchlistMovieEntity(movie.getId());
             try {
@@ -72,6 +73,7 @@ public class MovieListController implements Initializable {
                 e.printStackTrace();
             }
         }
+
     };
 
 
@@ -289,3 +291,8 @@ public class MovieListController implements Initializable {
         toggleSortState();
     }
 }
+
+
+
+
+

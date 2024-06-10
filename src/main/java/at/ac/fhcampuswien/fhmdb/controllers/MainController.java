@@ -30,6 +30,8 @@ public class MainController {
 
     private HamburgerBasicCloseTransition transition;
 
+
+
     public void initialize() {
         transition = new HamburgerBasicCloseTransition(hamburgerMenu);
         transition.setRate(-1);
@@ -42,12 +44,15 @@ public class MainController {
         navigateToMovielist();
     }
 
+
     private void toggleHamburgerTransitionState(){
         transition.setRate(transition.getRate() * -1);
         transition.play();
     }
 
+
     private void toggleMenuDrawer(){
+
         toggleHamburgerTransitionState();
 
         if(isMenuCollapsed) {
@@ -56,31 +61,42 @@ public class MainController {
             translateTransition.play();
             isMenuCollapsed = false;
             drawer.toFront();
-        } else {
+        }
+
+        else {
             TranslateTransition translateTransition=new TranslateTransition(Duration.seconds(0.5), drawer);
             translateTransition.setByX(-130);
             translateTransition.play();
             isMenuCollapsed = true;
             drawer.toBack();
         }
+
     }
 
+
     public void setContent(String fxmlPath) {
+
         FXMLLoader loader = new FXMLLoader(MainController.class.getResource(fxmlPath));
         loader.setControllerFactory(ControllerFactory.getInstance());
+
         try {
             mainPane.setCenter(loader.load());
-        } catch (Exception e) {
+        }
+
+        catch (Exception e) {
             e.printStackTrace();
         }
 
         if (!isMenuCollapsed) {
             toggleMenuDrawer();
         }
+
     }
+
 
     // count which actor is in the most movies
     public String getMostPopularActor(List<Movie> movies) {
+
         String actor = movies.stream()
                 .flatMap(movie -> movie.getMainCast().stream())
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
@@ -91,25 +107,33 @@ public class MainController {
                 .orElse("");
 
         return actor;
+
     }
 
     public int getLongestMovieTitle(List<Movie> movies) {
+
         return movies.stream()
                 .mapToInt(movie -> movie.getTitle().length())
                 .max()
                 .orElse(0);
+
     }
 
+
     public long countMoviesFrom(List<Movie> movies, String director) {
+
         return movies.stream()
                 .filter(movie -> movie.getDirectors().contains(director))
                 .count();
+
     }
 
     public List<Movie> getMoviesBetweenYears(List<Movie> movies, int startYear, int endYear) {
+
         return movies.stream()
                 .filter(movie -> movie.getReleaseYear() >= startYear && movie.getReleaseYear() <= endYear)
                 .collect(Collectors.toList());
+
     }
 
     @FXML
@@ -122,3 +146,7 @@ public class MainController {
         setContent(UIComponent.MOVIELIST.path);
     }
 }
+
+
+
+

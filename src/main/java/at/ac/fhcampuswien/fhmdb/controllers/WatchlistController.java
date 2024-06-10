@@ -79,6 +79,8 @@ public class WatchlistController implements Initializable, Observer {
             dialog.show();
         });
     }
-
-
 }
+
+
+
+
