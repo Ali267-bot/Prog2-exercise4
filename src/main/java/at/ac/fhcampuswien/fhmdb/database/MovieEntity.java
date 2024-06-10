@@ -40,6 +40,7 @@ public class MovieEntity {
 
     public MovieEntity(){}
 
+
     public MovieEntity(String apiId, String title, String description, int releaseYear, List<Genre> genres, String imgUrl, int lengthInMinutes, double rating) {
         this.apiId = apiId;
         this.title = title;
@@ -50,6 +51,7 @@ public class MovieEntity {
         this.lengthInMinutes = lengthInMinutes;
         this.rating = rating;
     }
+
 
     private String genresToString(List<Genre> genres) {
         StringBuilder sb = new StringBuilder();
@@ -84,42 +86,52 @@ public class MovieEntity {
         return description;
     }
 
+
     public void setDescription(String description) {
         this.description = description;
     }
+
 
     public int getReleaseYear() {
         return releaseYear;
     }
 
+
     public void setReleaseYear(int releaseYear) {
         this.releaseYear = releaseYear;
     }
 
+
     public String getImageUrl(){
         return this.imgUrl;
     }
+
 
     @Override
     public String toString() {
         return "Movie [id=" + id + ", apiId=" + apiId + ", title=" + title + ", description=" + description + ", releaseYear=" + releaseYear + "]";
     }
 
+
     public List<Genre> getGenres() {
         return Arrays.stream(genres.split(",")).map(Genre::valueOf).toList();
     }
+
 
     public void setGenres(List<Genre> genres) {
         this.genres = genresToString(genres);
     }
 
+
     public int getLengthInMinutes() {
         return lengthInMinutes;
     }
 
+
     public double getRating() {
         return rating;
     }
+
 
     public static List<MovieEntity> fromMovies(List<Movie> movies) {
         List<MovieEntity> movieEntities = new ArrayList<>();
@@ -138,6 +150,7 @@ public class MovieEntity {
         return movieEntities;
     }
 
+
     public static List<Movie> toMovies(List<MovieEntity> movieEntities) {
         List<Movie> movies = new ArrayList<>();
         for (MovieEntity movieEntity : movieEntities) {
@@ -155,3 +168,9 @@ public class MovieEntity {
         return movies;
     }
 }
+
+
+
+
+
+

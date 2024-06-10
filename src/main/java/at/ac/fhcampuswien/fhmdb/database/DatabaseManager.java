@@ -8,6 +8,7 @@ import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
 
 public class DatabaseManager {
+
     private static final String DB_URL = "jdbc:h2:file:./db/fhmdb"; // in memory: jdbc:h2:mem:fhmdb
     public static final String user = "admin";
     public static final String pass = "pass";
@@ -15,9 +16,11 @@ public class DatabaseManager {
     private static ConnectionSource connectionSource;
     private static DatabaseManager instance;
 
+
     private final Dao<WatchlistMovieEntity, Long> watchlistMovieDao;
 
     private final Dao<MovieEntity, Long> movieDao;
+
 
     private DatabaseManager() throws DataBaseException {
         try {
@@ -30,6 +33,7 @@ public class DatabaseManager {
         }
     }
 
+
     // get singleton database instance
     public static DatabaseManager getInstance() throws DataBaseException {
         if (instance == null) {
@@ -38,12 +42,14 @@ public class DatabaseManager {
         return instance;
     }
 
+
     public static ConnectionSource getConnectionSource() throws DataBaseException {
         if (connectionSource == null) {
             createConnectionSource();
         }
         return connectionSource;
     }
+
 
     private static void createConnectionSource() throws DataBaseException {
         try {
@@ -61,6 +67,7 @@ public class DatabaseManager {
         }
     }
 
+
     // close the db connection
     public static void closeConnectionSource() throws DataBaseException {
         if(connectionSource != null){
@@ -73,11 +80,13 @@ public class DatabaseManager {
         }
     }
 
+
     // creates the tables in the database
     private static void createTables() throws SQLException {
         TableUtils.createTableIfNotExists(connectionSource, WatchlistMovieEntity.class);
         TableUtils.createTableIfNotExists(connectionSource, MovieEntity.class);
     }
+
 
     // removes tables from database
     private static void dropTables() throws SQLException {
@@ -85,11 +94,15 @@ public class DatabaseManager {
         TableUtils.dropTable(connectionSource, MovieEntity.class, true);
     }
 
+
     public Dao<WatchlistMovieEntity, Long> getWatchlistDao() {
         return watchlistMovieDao;
     }
+
 
     public Dao<MovieEntity, Long> getMovieDao() {
         return movieDao;
     }
 }
+
+
